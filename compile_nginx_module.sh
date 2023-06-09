@@ -4,7 +4,7 @@
 nginx_version="1.24.0"
 zlib_version="1.2.13"
 pcre_version="10.42"
-openssl_version="3.0.8"
+openssl_version="3.1.1"
 
 sudo add-apt-repository ppa:maxmind/ppa
 apt-get update
