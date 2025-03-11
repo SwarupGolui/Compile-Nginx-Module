@@ -1,10 +1,10 @@
 #!/bin/bash 
 
 #set versions
-nginx_version="1.24.0"
-zlib_version="1.2.13"
-pcre_version="10.42"
-openssl_version="3.1.1"
+nginx_version="1.26.3"
+zlib_version="1.3.1"
+pcre_version="10.45"
+openssl_version="3.4.1"
 
 sudo add-apt-repository ppa:maxmind/ppa
 apt-get update
@@ -15,13 +15,13 @@ cd ./
 wget "https://nginx.org/download/nginx-$nginx_version.tar.gz" -O - | tar -xz
 
 # brotili
-# git clone --recurse-submodules https://github.com/google/ngx_brotli.git
 git clone --recurse-submodules -j8 https://github.com/google/ngx_brotli
 cd ngx_brotli/deps/brotli
 mkdir out && cd out
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -m64 -march=native -mtune=native -flto -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_CXX_FLAGS="-Ofast -m64 -march=native -mtune=native -flto -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed ..
 cmake --build . --config Release --target brotlienc
 cd ../../../..
+
 
 # headers-more
 git clone https://github.com/openresty/headers-more-nginx-module.git
@@ -38,15 +38,8 @@ git clone https://github.com/nginx-modules/ngx_cache_purge.git
 # ngx_http_geoip2_module
 git clone https://github.com/leev/ngx_http_geoip2_module.git
 
-# pagespeed $ PSOL
-git clone --depth=1 https://github.com/apache/incubator-pagespeed-ngx.git
-wget http://www.tiredofit.nl/psol-jammy.tar.xz
-tar xvf psol-jammy.tar.xz
-mv psol incubator-pagespeed-ngx
 
-
-
-# Download zlib
+# Download zlib pcre2 openssl
 wget "https://github.com/madler/zlib/archive/refs/tags/v$zlib_version.tar.gz" -O - | tar -xz
 wget "https://github.com/PhilipHazel/pcre2/releases/download/pcre2-$pcre_version/pcre2-$pcre_version.tar.gz" -O - | tar -xz
 wget "https://www.openssl.org/source/openssl-$openssl_version.tar.gz" -O - | tar -xz
@@ -54,7 +47,7 @@ wget "https://www.openssl.org/source/openssl-$openssl_version.tar.gz" -O - | tar
 
 cd ./nginx-$nginx_version/
 
-./configure --with-compat --add-dynamic-module=../ngx_brotli --with-zlib=../zlib-$zlib_version --add-dynamic-module=../headers-more-nginx-module --add-dynamic-module=../nginx-module-vts --add-dynamic-module=../echo-nginx-module --add-dynamic-module=../ngx_cache_purge --add-dynamic-module=../ngx_http_geoip2_module --add-dynamic-module=../incubator-pagespeed-ngx --with-pcre=../pcre2-$pcre_version --with-openssl=../openssl-$openssl_version 
+./configure --with-compat --add-dynamic-module=../ngx_brotli --with-zlib=../zlib-$zlib_version --add-dynamic-module=../headers-more-nginx-module --add-dynamic-module=../nginx-module-vts --add-dynamic-module=../echo-nginx-module --add-dynamic-module=../ngx_cache_purge --add-dynamic-module=../ngx_http_geoip2_module --with-pcre=../pcre2-$pcre_version --with-openssl=../openssl-$openssl_version 
 make modules
 cd ..
 tar -cvf ./modules.tar.gz ./nginx-$nginx_version/objs/*.so
